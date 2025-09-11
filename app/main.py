@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from . import models,schemas
 from .database import engine,get_db
 from .schemas import CreateTodo,UpdateTodo
+from pydantic import BaseModel
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -53,27 +54,27 @@ def create_todo(todo:CreateTodo ,db: Session = Depends(get_db)):
     return {"message": "Todo created", "todo": new_todo}
 
 
-@app.put("/todo/{todo_id}")
-def update_todo(todo_id: int, todo: UpdateTodo,db: Session = Depends(get_db)):
-
-    todo_query=db.query(models.Todo).filter(models.Todo.id==todo_id)
-    todo_update=todo_query.first()
-    if not todo_update:
-        return {"message": f"Todo {todo_id} not found"}
-        todo_query.update(todo.dict(), synchronize_session=False)
-        db.commit()
-        return {"message": f"Todo {todo_id} updated", "todo": todo}
 
 
+@app.delete("/todo/{id}")
+def delete_todo(id: int,db: Session = Depends(get_db)):
+    todos=db.query(models.Todo).filter(models.Todo.id==id)
+    if todos.first() is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Todo with id: {id} does not exist")
+    todos.delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.delete("/todo/{todo_id}")
-def delete_todo(todo_id: int,db: Session = Depends(get_db)):
-    todo_query=db.query(models.Todo).filter(models.Todo.id==todo_id)
-    todo=todo_query.first()
-    if not todo:
-     return {"message": f"Todo {todo_id} not found"}
-     todo.delete(synchronize_session=False)
-     db.commit()
-     return {"message": f"Todo {todo_id} deleted"}
+@app.put("/todo/{id}")
+def update_todo(id: int, todo: UpdateTodo,db: Session = Depends(get_db)):
+    todo_query=db.query(models.Todo).filter(models.Todo.id==id)
+    todos=todo_query.first()
+    if todos is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Todo with id: {id} does not exist")
+    todo_query.update(todo.dict(), synchronize_session=False)
+    db.commit()
+    return {"message": todo_query.first()}
 
 

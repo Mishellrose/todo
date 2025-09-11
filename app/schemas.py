@@ -7,5 +7,5 @@ class CreateTodo(BaseModel):
     completed: bool = False
 
 class UpdateTodo(BaseModel):
-    title: Optional[str]
-    completed: Optional[bool]
+    title: str
+    completed: bool
