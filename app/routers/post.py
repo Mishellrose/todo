@@ -66,4 +66,4 @@ def update_todo(id: int, todo: schemas.PostCreate,db: Session = Depends(get_db),
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
     todo_query.update(todo.dict(), synchronize_session=False)
     db.commit()
-    return {"message": todo_query.first()}
+    return todo_query.first()
