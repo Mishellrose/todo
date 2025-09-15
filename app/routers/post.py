@@ -29,7 +29,7 @@ def get_post(id: int,db:Session=Depends(get_db),current_user:int =Depends(oauth2
    # cursor.execute("""SELECT * FROM posts WHERE id=%s """,str(id),)
     #get_new_post=cursor.fetchone()
 
-    post=db.query(models.Post).filter(models.Post.id==id).first()
+    post=db.query(models.Todo).filter(models.Todo.id==id).all()
 
     if not post:
         raise HTTPException(
