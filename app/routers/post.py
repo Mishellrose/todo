@@ -30,8 +30,9 @@ def get_my_todos(id: int, db:Session=Depends(get_db),current_user: int = Depends
     if todos is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Todo with id: {id} does not exist")
-    if todos[0].owner_id!= current_user.id:
+    if id!= current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
+    
     public_todos=db.query(models.Todo).filter(models.Todo.is_public==True).all()
     todos.extend(public_todos)
     return todos
