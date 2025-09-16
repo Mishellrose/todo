@@ -9,7 +9,9 @@ class PostBase(BaseModel):
 
 
 class PostCreate(PostBase):
-    pass
+    title: str
+    completed: bool = False
+    is_public: Optional[bool] = False
 
 class UserOut(BaseModel):
     id:int
@@ -23,7 +25,9 @@ class Post(PostBase):
     id:int
     created_at:datetime
     owner_id:int
+    is_public: bool = False
     owner:UserOut
+    
 
     class Config:
         orm_mode = True

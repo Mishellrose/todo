@@ -14,6 +14,15 @@ def read_todos(db:Session=Depends(get_db),current_user: int = Depends(oauth2.get
     todos=db.query(models.Todo).all()
     return todos
 
+@router.get("/mytodos",response_model=list[schemas.Post])
+def read_my_todos(db:Session=Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+    todos=db.query(models.Todo).filter(models.Todo.owner_id==current_user.id).all()
+    public_todos=db.query(models.Todo).filter(models.Todo.is_public==True).all()
+    todos.extend(public_todos)
+    return todos
+
+   
+
 @router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.Post)
 def create_todo(todo:schemas.PostCreate ,db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)): 
     print(current_user.id)
