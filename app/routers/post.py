@@ -53,6 +53,12 @@ def get_post(id: int,db:Session=Depends(get_db),current_user:int =Depends(oauth2
         )
     return post
 
+@router.get("/public",response_model=list[schemas.Post])
+def get_public_todos(db:Session=Depends(get_db)):
+    todos_query=db.query(models.Todo).filter(models.Todo.is_public==True)
+    todos=todos_query.all()
+    return todos
+
 
 
 
