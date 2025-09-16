@@ -9,17 +9,19 @@ from typing import List
 
 router = APIRouter(prefix="/posts",tags=["Posts"])
 
-@router.get("/public",response_model=list[schemas.Post])
-def get_public_todos(db:Session=Depends(get_db)):
-    todos_query=db.query(models.Todo).filter(models.Todo.is_public==True)
-    todos=todos_query.all()
-    return todos
 
 
 @router.get("/",response_model=list[schemas.Post])
 def read_todos(db:Session=Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
     todos=db.query(models.Todo).all()
     return todos
+
+@router.get("/public",response_model=list[schemas.Post])
+def get_public_todos(db:Session=Depends(get_db)):
+    todos=db.query(models.Todo).filter(models.Todo.is_public==True).all()
+    return todos
+
+
 
 @router.get("/mytodos/{id}",response_model=list[schemas.Post])
 def get_my_todos(id: int, db:Session=Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
