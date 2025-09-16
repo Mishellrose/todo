@@ -14,9 +14,15 @@ def read_todos(db:Session=Depends(get_db),current_user: int = Depends(oauth2.get
     todos=db.query(models.Todo).all()
     return todos
 
-@router.get("/mytodos",response_model=list[schemas.Post])
-def read_my_todos(db:Session=Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
-    todos=db.query(models.Todo).filter(models.Todo.owner_id==current_user.id).all()
+@router.get("/mytodos/{id}",response_model=list[schemas.Post])
+def get_my_todos(id: int, db:Session=Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+    todos_query=db.query(models.Todo).filter(models.Todo.owner_id==current_user.id)
+    todos=todos_query.all()
+    if todos is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Todo with id: {id} does not exist")
+    if todos[0].owner_id!= current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
     public_todos=db.query(models.Todo).filter(models.Todo.is_public==True).all()
     todos.extend(public_todos)
     return todos
